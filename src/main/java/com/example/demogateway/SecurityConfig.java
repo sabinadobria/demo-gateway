@@ -16,7 +16,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-                .withUser("user").password(passwordEncoder().encode("password")).roles("USER")
+                .withUser("user").password(passwordEncoder().encode("password")).authorities("ROLE_USER")
                 .and()
                 .withUser("admin").password(passwordEncoder().encode("admin")).roles("ADMIN");
 
@@ -26,15 +26,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .formLogin()
-                .defaultSuccessUrl("/home/index.html", true)
-                .and()
                 .authorizeRequests()
-                .antMatchers("/book-service/**", "/rating-service/**", "/login*", "/").permitAll()
+                .antMatchers("/book-service/**", "/rating-service/**", "/login*", "/").authenticated()
                 .antMatchers("/eureka/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .logout()
+                .and()
+                .httpBasic()
                 .and()
                 .csrf().disable();
     }
